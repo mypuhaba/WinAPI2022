@@ -1,6 +1,9 @@
 Release/
 Debug/
 .vs/
+x64/
+x86/
+
 *.suo
 
 # Prerequisites
