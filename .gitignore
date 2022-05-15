@@ -1,10 +1,7 @@
 Release/
 Debug/
 .vs/
-*.sln
 *.suo
-*.vcxproj.filters
-*.vcxproj.users
 
 # Prerequisites
 *.d
