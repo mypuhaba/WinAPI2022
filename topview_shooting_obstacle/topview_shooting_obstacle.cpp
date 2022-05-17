@@ -60,7 +60,7 @@ int APIENTRY WinMain (HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCm
 		WndClass.style=CS_HREDRAW | CS_VREDRAW;
 		RegisterClass(&WndClass);
 	}
-	hWnd = CreateWindow (lpszClass,lpszClass,WS_OVERLAPPEDWINDOW, 0, 0,800, 800,NULL,(HMENU)NULL,hInstance,NULL);		//--- 윈도우 크기 변경 가능
+	hWnd = CreateWindow (lpszClass,lpszClass,WS_OVERLAPPEDWINDOW, 0, 0, 800, 800,NULL,(HMENU)NULL,hInstance,NULL);		//--- 윈도우 크기 변경 가능
 	ShowWindow(hWnd,nCmdShow);
 	
 	while(GetMessage(&Message,0,0,0)) {
@@ -237,7 +237,7 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT iMessage,WPARAM wParam,LPARAM lParam)
 			break;
 
 		case WM_TIMER:
-				hdc = GetDC(hWnd);
+				//hdc = GetDC(hWnd);
 				switch (wParam) {
 				case 100:
 					for (i = 0; i < bulletCount; i++) {
@@ -273,7 +273,7 @@ LRESULT CALLBACK WndProc(HWND hWnd,UINT iMessage,WPARAM wParam,LPARAM lParam)
 						}
 					}
 				}
-				ReleaseDC(hWnd, hdc);
+				//ReleaseDC(hWnd, hdc);
 				InvalidateRect(hWnd, NULL, false);
 				break;
 
