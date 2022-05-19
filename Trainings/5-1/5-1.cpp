@@ -1,6 +1,5 @@
 #include <windows.h>
 #include <atlimage.h>
-#include "resource.h"
 
 LPCTSTR lpszClass = L"Window Class Name";
 LPCTSTR lpszWindowName = L"5-1";
@@ -45,136 +44,148 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR ipszCmdPr
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
-	static HDC hdc, mem1dc, mem2dc;
 	PAINTSTRUCT ps;
-	static HBITMAP hBit1, hBit2, oldBit1, oldBit2;
-	static int yPos;
-	static RECT rectView;
-	TCHAR word[] = L"ARIA the Animation";
-	//static DWORD dwRop;
+	static int xPos,yPos, nW, nH, w, h, zw, zh; // xPos/yPos: DC에 그릴 위치
+	//nW/nH: 대상 사각형, w/h: 소스 사각형
+	static CImage img;
+	HDC hdc, memdc;
+	static RECT rect;
+	static HBITMAP hBitmap;
+	static DWORD dwRop;
 
 	switch (iMsg)
 	{
 	case WM_CREATE:
-		yPos = -30;
-		GetClientRect(hwnd, &rectView);
-		SetTimer(hwnd, 1, 70, NULL);
-		hBit2 = LoadBitmap(g_hinst, MAKEINTRESOURCE(IDB_BITMAP5_2));
+		img.Load(TEXT("image1.jpg"));
+		GetClientRect(hwnd, &rect);
+		xPos = 0; yPos = 0;
+		w = img.GetWidth();
+		h = img.GetHeight();
+		nW = w; nH = h;
+		zw = 0; zh = 0;
+		dwRop = SRCCOPY;
 		break;
+
 	case WM_PAINT:
-		GetClientRect(hwnd, &rectView);
 		hdc = BeginPaint(hwnd, &ps);
-		mem1dc = CreateCompatibleDC(hdc);
-		mem2dc = CreateCompatibleDC(mem1dc);
-		if (hBit1 == NULL)
-			hBit1 = CreateCompatibleBitmap(hdc, 530, 530);
-		oldBit1 = (HBITMAP)SelectObject(mem1dc, hBit1);
-		oldBit2 = (HBITMAP)SelectObject(mem2dc, hBit2);
-		BitBlt(mem1dc, 0, 0, 530, 530, mem2dc, 0, 0, SRCCOPY);
-		SetBkMode(mem1dc, TRANSPARENT);
-		TextPrint(mem1dc, 200, yPos, word);
-		BitBlt(hdc, 0, 0, 530, 530, mem1dc, 0, 0, SRCCOPY);
-		SelectObject(mem1dc, oldBit1);
-		SelectObject(mem2dc, oldBit2);
-		DeleteDC(mem2dc);
-		DeleteDC(mem1dc);
+		hBitmap = CreateCompatibleBitmap(hdc, rect.right, rect.bottom);
+		memdc = CreateCompatibleDC(hdc);
+		(HBITMAP)SelectObject(memdc, hBitmap);
+		img.Draw(memdc, 0, 0, nW, nH, 0, 0, w, h);
+		//StretchBlt(hdc, 0, 0, nW + zw, nH + zh, memdc, 0, 0, w, h, SRCCOPY);
+		BitBlt(hdc, xPos, yPos, nW, nH, memdc, 0, 0, dwRop);
+		DeleteObject(hBitmap);
+		DeleteDC(memdc);
 		EndPaint(hwnd, &ps);
-		return 0;
 		break;
-	case WM_TIMER:
-		yPos += 5;
-		if (yPos > rectView.bottom) yPos = -30;
-		InvalidateRgn(hwnd, NULL, false);
-		return 0;
-		break;
+
 	case WM_CHAR:
+		switch (wParam)
+		{
+		case 'r':
+			if (dwRop == SRCCOPY)
+				dwRop = NOTSRCCOPY;
+			else dwRop = SRCCOPY;
+			InvalidateRgn(hwnd, NULL, true);
+			break;
+		case 'a':
+			if (nW == rect.right)
+				nW = w;
+			if (nH == rect.bottom)
+				nH = h;
+			else
+			{
+				nW = rect.right;
+				nH = rect.bottom;
+			}
+			InvalidateRgn(hwnd, NULL, true);
+			break;
+		case '2':
+			hdc = GetDC(hwnd);
+			hBitmap = CreateCompatibleBitmap(hdc, rect.right, rect.bottom);
+			memdc = CreateCompatibleDC(hdc);
+			(HBITMAP)SelectObject(memdc, hBitmap);
+			img.Draw(memdc, 0, 0, nW / 2, nH / 2, 0, 0, w, h);
+			BitBlt(hdc, xPos, yPos, nW, nH, memdc, 0, 0, SRCCOPY);
+			BitBlt(hdc, xPos + nW / 2, yPos, nW / 2, nH / 2, memdc, 0, 0, NOTSRCCOPY);
+			BitBlt(hdc, xPos, yPos + nH / 2, nW / 2, nH / 2, memdc, 0, 0, NOTSRCCOPY);
+			BitBlt(hdc, xPos + nW / 2, yPos + nH / 2, nW / 2, nH / 2, memdc, 0, 0, SRCCOPY);
+			DeleteObject(hBitmap);
+			DeleteDC(memdc);
+			ReleaseDC(hwnd, hdc);
+			break;
+		case '3':
+			hdc = GetDC(hwnd);
+			hBitmap = CreateCompatibleBitmap(hdc, rect.right, rect.bottom);
+			memdc = CreateCompatibleDC(hdc);
+			(HBITMAP)SelectObject(memdc, hBitmap);
+			img.Draw(memdc, 0, 0, nW / 3, nH / 3, 0, 0, w, h);
+			BitBlt(hdc, xPos, yPos, nW / 3, nH / 3, memdc, 0, 0, NOTSRCCOPY); // 1
+			BitBlt(hdc, xPos + nW / 3, yPos, nW / 3, nH / 3, memdc, 0, 0, SRCCOPY); // 2
+			BitBlt(hdc, xPos + nW * 2 / 3, yPos, nW / 3, nH / 3, memdc, 0, 0, NOTSRCCOPY);  // 3
+			BitBlt(hdc, xPos, yPos + nH/3, nW / 3, nH / 3, memdc, 0, 0, SRCCOPY); // 4
+			BitBlt(hdc, xPos + nW / 3, yPos + nH / 3, nW / 3, nH / 3, memdc, 0, 0, NOTSRCCOPY); // 5
+			BitBlt(hdc, xPos + nW * 2 / 3, yPos + nH / 3, nW / 3, nH / 3, memdc, 0, 0, SRCCOPY); // 6
+			BitBlt(hdc, xPos, yPos + 2 * nH / 3, nW / 3, nH / 3, memdc, 0, 0, NOTSRCCOPY); // 7
+			BitBlt(hdc, xPos + nW / 3, yPos + nH * 2 / 3, nW / 3, nH / 3, memdc, 0, 0, SRCCOPY); // 8
+			BitBlt(hdc, xPos + nW * 2 / 3, yPos + nH * 2 / 3, nW / 3, nH / 3, memdc, 0, 0, NOTSRCCOPY); // 9
+			DeleteObject(hBitmap);
+			DeleteDC(memdc);
+			ReleaseDC(hwnd, hdc);
+			break;
+		case 'q':
+			img.Destroy();
+			PostQuitMessage(0);
+			break;
+		}
 		break;
+
+	case WM_KEYDOWN:
+		switch (wParam)
+		{
+		case VK_LEFT:
+			xPos -= 10;
+			InvalidateRgn(hwnd, NULL, true);
+			break;
+
+		case VK_RIGHT:
+			xPos += 10;
+			InvalidateRgn(hwnd, NULL, true);
+			break;
+		case VK_ADD:
+			hdc = GetDC(hwnd);
+			hBitmap = CreateCompatibleBitmap(hdc, rect.right, rect.bottom);
+			memdc = CreateCompatibleDC(hdc);
+			(HBITMAP)SelectObject(memdc, hBitmap);
+			img.Draw(memdc, 0, 0, nW, nH, 0, 0, w, h);
+			StretchBlt(hdc, 0, 0, nW + zw, nH + zh, memdc, 0, 0, w, h, WHITENESS);
+			zw += 20; zh += 20;
+			StretchBlt(hdc, 0, 0, nW + zw, nH + zh, memdc, 0, 0, w, h, SRCCOPY);
+			DeleteObject(hBitmap);
+			DeleteDC(memdc);
+			ReleaseDC(hwnd, hdc);
+			break;
+		case VK_SUBTRACT:
+			
+			hdc = GetDC(hwnd);
+			hBitmap = CreateCompatibleBitmap(hdc, rect.right, rect.bottom);
+			memdc = CreateCompatibleDC(hdc);
+			(HBITMAP)SelectObject(memdc, hBitmap);
+			img.Draw(memdc, 0, 0, nW, nH, 0, 0, w, h);
+			StretchBlt(hdc, 0, 0, nW + zw, nH + zh, memdc, 0, 0, w, h, WHITENESS);
+			zw -= 20; zh -= 20;
+			StretchBlt(hdc, 0, 0, nW + zw, nH + zh, memdc, 0, 0, w, h, SRCCOPY);
+			DeleteObject(hBitmap);
+			DeleteDC(memdc);
+			ReleaseDC(hwnd, hdc);
+			break;
+		}
+		break;
+
 	case WM_DESTROY:
-		if (hBit1) DeleteObject(hBit1);
-		DeleteObject(hBit2);
-		KillTimer(hwnd, 1);
+		img.Destroy();
 		PostQuitMessage(0);
 		break;
 	}
 	return DefWindowProc(hwnd, iMsg, wParam, lParam);
 }
-
-void TextPrint(HDC hdc, int x, int y, TCHAR text[])
-	{
-		int i, j;
-		SetTextColor(hdc, RGB(255, 255, 255));
-		for (i = -1; i <= 1; ++i)
-			for (j = -1; j <= 1; ++j)
-				TextOut(hdc, x + i, y + j, text, lstrlen(text));
-		SetTextColor(hdc, RGB(0, 0, 0));
-		TextOut(hdc, x, y, text, lstrlen(text));
-	}
-
-	//HDC hdc, memdc;
-	//static HBITMAP hBitmap;
-	//PAINTSTRUCT ps;
-	//static CImage img, imgSprite;
-	//static int xPos = 0, yPos = 0;
-	//static RECT rect;
-	//static DWORD op = SRCCOPY;
-
-	//switch (iMsg)
-	//{
-	//case WM_CREATE:
-	//	img.Load(L"image.bmp"); //--- background
-	//	//imgSprite.Load(L”bitmap2.bmp”); //--- sprite image
-	//	GetClientRect(hwnd, &rect);
-	//	break;
-	//case WM_PAINT:
-	//	hdc = BeginPaint(hwnd, &ps);
-	//	hBitmap = CreateCompatibleBitmap(hdc, rect.right, rect.bottom);
-	//	memdc = CreateCompatibleDC(hdc);
-	//	(HBITMAP)SelectObject(memdc, hBitmap);
-	//	img.Draw(memdc, 0, 0, rect.right, rect.bottom, 0, 0, img.GetWidth(), img.GetHeight()); //--- 메모리 DC에 배경 그리기
-	//		//imgSprite.Draw(memdc, xPos, yPos, 100, 100, 0, 0, 100, 100); //--- 메모리 DC에 스프라이트 그리기
-	//	BitBlt(hdc, 0, 0, rect.right, rect.bottom, memdc, 0, 0, op); //--- 메모리 DC의 그림을 화면 DC에 복사하기
-	//	DeleteObject(hBitmap);
-	//	DeleteDC(memdc);
-	//	EndPaint(hwnd, &ps);
-	//	break;
-
-	//case WM_TIMER:
-	//	xPos += 5;
-	//	yPos += 5;
-	//	InvalidateRect(hwnd, NULL, false);
-	//	break;
-
-	//case WM_MOUSEMOVE:
-	//	break;
-
-	//case WM_LBUTTONUP:
-
-	//	break;
-
-	//case WM_LBUTTONDOWN:
-
-	//	break;
-
-	//case WM_CHAR:
-	//	switch (wParam)
-	//	{
-	//	case 'r':
-	//		static int dir = 1;
-	//		if (dir == 1)
-	//		{
-	//			op = NOTSRCCOPY;
-	//			InvalidateRgn(hwnd, NULL, true);
-	//		}
-	//		else dir = 1;
-
-	//		break;
-	//	}
-	//	break;
-
-
-	//case WM_DESTROY:
-	//	PostQuitMessage(0);
-	//	break;
-	//}
-	//return DefWindowProc(hwnd, iMsg, wParam, lParam);
-//}
