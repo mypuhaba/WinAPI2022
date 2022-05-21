@@ -12,30 +12,30 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR ipszCmdPr
 {
 	HWND hWnd;
 	MSG Message;
-	WNDCLASSEX wndclass; // ±¸Á¶Ã¼ Á¤ÀÇ
+	WNDCLASSEX wndclass; // êµ¬ì¡°ì²´ ì •ì˜
 	g_hinst = hInstance;
 
 	wndclass.cbSize = sizeof(wndclass);
-	wndclass.style = CS_HREDRAW | CS_VREDRAW; // À©µµ¿ì Ãâ·Â ½ºÅ¸ÀÏ
+	wndclass.style = CS_HREDRAW | CS_VREDRAW; // ìœˆë„ìš° ì¶œë ¥ ìŠ¤íƒ€ì¼
 	wndclass.lpfnWndProc = (WNDPROC)WndProc;
 	wndclass.cbClsExtra = 0;
 	wndclass.cbWndExtra = 0;
 	wndclass.hInstance = hInstance;
-	wndclass.hIcon = LoadIcon(NULL, IDI_APPLICATION); // ¾ÆÀÌÄÜ À¯Çü
-	wndclass.hCursor = LoadCursor(NULL, IDC_ARROW); // Ä¿¼­ À¯Çü
-	wndclass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH); // ¹è°æ
-	wndclass.lpszMenuName = NULL; // ¸Ş´º ÀÌ¸§
-	wndclass.lpszClassName = lpszClass; // Å¬·¡½º ÀÌ¸§
-	wndclass.hIconSm = LoadIcon(NULL, IDI_APPLICATION); //ÀÛÀº ¾ÆÀÌÄÜ
+	wndclass.hIcon = LoadIcon(NULL, IDI_APPLICATION); // ì•„ì´ì½˜ ìœ í˜•
+	wndclass.hCursor = LoadCursor(NULL, IDC_ARROW); // ì»¤ì„œ ìœ í˜•
+	wndclass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH); // ë°°ê²½
+	wndclass.lpszMenuName = NULL; // ë©”ë‰´ ì´ë¦„
+	wndclass.lpszClassName = lpszClass; // í´ë˜ìŠ¤ ì´ë¦„
+	wndclass.hIconSm = LoadIcon(NULL, IDI_APPLICATION); //ì‘ì€ ì•„ì´ì½˜
 	RegisterClassExW(&wndclass);
 
 	hWnd = CreateWindow(lpszClass, lpszWindowName, WS_OVERLAPPEDWINDOW,
-		0, 0, 900, 800, NULL, (HMENU)NULL, hInstance, NULL); //À©µµ¿ì ¸¸µé±â ÇÔ¼ö
+		0, 0, 900, 800, NULL, (HMENU)NULL, hInstance, NULL); //ìœˆë„ìš° ë§Œë“¤ê¸° í•¨ìˆ˜
 
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
 
-	while (GetMessage(&Message, 0, 0, 0)) { // ¸Ş½ÃÁö Å¥·ÎºÎÅÍ ¸Ş½ÃÁö¸¦ ¾ò¾î¿Â´Ù
+	while (GetMessage(&Message, 0, 0, 0)) { // ë©”ì‹œì§€ íë¡œë¶€í„° ë©”ì‹œì§€ë¥¼ ì–»ì–´ì˜¨ë‹¤
 		TranslateMessage(&Message);
 		DispatchMessage(&Message);
 	}
@@ -47,14 +47,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 	PAINTSTRUCT ps;
 	static CImage img;
 	static HDC hdc, memdc;
-	static RECT rect; // À©µµ¿ì »ç°¢Çü
+	static RECT rect; // ìœˆë„ìš° ì‚¬ê°í˜•
 	static int xPos, yPos, nW, nH, sw, sh, zw, zh, mx, my;
-	// xPos/yPos: DC¿¡ ±×¸± À§Ä¡
-	// nW/nH: ±×¸± »ç°¢Çü Å©±â, sw/sh: ¼Ò½º ÀÌ¹ÌÁö Å©±â
-	// zw/zh: Å©±â º¯°æ, mx/my: ¸¶¿ì½º À§Ä¡
+	// xPos/yPos: DCì— ê·¸ë¦´ ìœ„ì¹˜
+	// nW/nH: ê·¸ë¦´ ì‚¬ê°í˜• í¬ê¸°, sw/sh: ì†ŒìŠ¤ ì´ë¯¸ì§€ í¬ê¸°
+	// zw/zh: í¬ê¸° ë³€ê²½, mx/my: ë§ˆìš°ìŠ¤ ìœ„ì¹˜
 	static HBITMAP hBitmap;
-	static DWORD dwRop; // ¼Ò½º Ãâ·Â
-	static int div; // 2: 2x2ºĞÇÒ, 3: 3x3ºĞÇÒ
+	static DWORD dwRop; // ì†ŒìŠ¤ ì¶œë ¥
+	static int div; // 2: 2x2ë¶„í• , 3: 3x3ë¶„í• 
 	static RECT selection;
 	static bool select[3][3];
 	static int i, j;
@@ -209,7 +209,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 					}
 					else if (select[2][0])
 					{
-						BitBlt(hdc, xPos, 0 + 2 * nH, nW, nH, memdc, 0, 0, NOTSRCCOPY); // 7
 						BitBlt(hdc, 0, 0, nW, nH, memdc, 0, 0, NOTSRCCOPY); // 1
 						BitBlt(hdc, nW, 0, nW, nH, memdc, 0, 0, SRCCOPY); // 2
 						BitBlt(hdc, nW * 2, 0, nW, nH, memdc, 0, 0, NOTSRCCOPY);  // 3
@@ -218,10 +217,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 						BitBlt(hdc, 0 + nW * 2, 0 + nH, nW, nH, memdc, 0, 0, SRCCOPY); // 6
 						BitBlt(hdc, 0 + nW, 0 + nH * 2, nW, nH, memdc, 0, 0, SRCCOPY); // 8
 						BitBlt(hdc, 0 + nW * 2, 0 + nH * 2, nW, nH, memdc, 0, 0, NOTSRCCOPY); // 9
+						BitBlt(hdc, xPos, 0 + 2 * nH, nW, nH, memdc, 0, 0, NOTSRCCOPY); // 7
 					}
 					else if (select[2][1])
 					{
-						BitBlt(hdc, nW + xPos, 0 + nH * 2, nW, nH, memdc, 0, 0, SRCCOPY); // 8
 						BitBlt(hdc, 0, 0, nW, nH, memdc, 0, 0, NOTSRCCOPY); // 1
 						BitBlt(hdc, nW, 0, nW, nH, memdc, 0, 0, SRCCOPY); // 2
 						BitBlt(hdc, nW * 2, 0, nW, nH, memdc, 0, 0, NOTSRCCOPY);  // 3
@@ -230,6 +229,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 						BitBlt(hdc, 0 + nW * 2, 0 + nH, nW, nH, memdc, 0, 0, SRCCOPY); // 6
 						BitBlt(hdc, 0, 0 + 2 * nH, nW, nH, memdc, 0, 0, NOTSRCCOPY); // 7
 						BitBlt(hdc, 0 + nW * 2, 0 + nH * 2, nW, nH, memdc, 0, 0, NOTSRCCOPY); // 9
+						BitBlt(hdc, nW + xPos, 0 + nH * 2, nW, nH, memdc, 0, 0, SRCCOPY); // 8
 					}
 					else if (select[2][2])
 					{
@@ -305,7 +305,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 			}
 			InvalidateRgn(hwnd, NULL, true);
 			break;
-		case '1': // ¸®ÅÏ Åõ ÃÊ±âÈ­¸é
+		case '1': // ë¦¬í„´ íˆ¬ ì´ˆê¸°í™”ë©´
 			xPos = 0;
 			nW = sw; nH = sh;
 			zw = 0; zh = 0;
