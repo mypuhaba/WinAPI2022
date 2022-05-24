@@ -64,7 +64,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_CREATE:
 		dwRop = SRCCOPY;
-		img.Load(TEXT("image1.jpg"));
+		img.Load(TEXT("image2.jpg"));
 		GetClientRect(hwnd, &rect);
 		sw = img.GetWidth();
 		sh = img.GetHeight();
